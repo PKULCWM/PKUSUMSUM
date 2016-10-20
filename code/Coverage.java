@@ -28,8 +28,8 @@ import java.util.ArrayList;
  * */
 
 public class Coverage {
-	public doc myDoc = new doc();
-    public ArrayList<Integer> summary_id = new ArrayList<>();
+	public Doc myDoc = new Doc();
+    public ArrayList<Integer> summaryId = new ArrayList<>();
     public int sumNum = 0;
     
     public void Summarize(String args[]) throws IOException
@@ -45,13 +45,13 @@ public class Coverage {
         myDoc.readfile(myfile.list(),args[0],args[2],args[6]);
         
         /* Get abstract */    
-    	int tmpf = 0, tmpS = 0;
+    	int tmpF = 0, tmpS = 0;
     	int sNum = 0;
         while(sumNum <= myDoc.maxlen && sNum < myDoc.snum) {
-        	tmpf = sNum % myDoc.fnum;
+        	tmpF = sNum % myDoc.fnum;
         	tmpS = sNum / myDoc.fnum;
-        	summary_id.add(myDoc.l_range[tmpf] + tmpS);
-        	sumNum += myDoc.sen_len.get(myDoc.l_range[tmpf] + tmpS);
+        	summaryId.add(myDoc.lRange[tmpF] + tmpS);
+        	sumNum += myDoc.senLen.get(myDoc.lRange[tmpF] + tmpS);
         	sNum++;
         }
         
@@ -60,9 +60,9 @@ public class Coverage {
     		File outfile = new File(args[1]);
     		OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(outfile),"utf-8");
     		BufferedWriter writer = new BufferedWriter(write);
-    		for (int i : summary_id){
-                //System.out.println(myDoc.original_sen.get(i));
-    			writer.write(myDoc.original_sen.get(i));
+    		for (int i : summaryId){
+                //System.out.println(myDoc.originalSen.get(i));
+    			writer.write(myDoc.originalSen.get(i));
     			writer.write("\n");
             }
     		writer.close();

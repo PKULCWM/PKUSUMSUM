@@ -35,7 +35,7 @@ import java.io.OutputStreamWriter;
 
 
 public class ManifoldRank {
-	public doc myDoc = new doc();
+	public Doc myDoc = new Doc();
     public int sumNum = 0;
     public double[][] linkW;
     public void Summarize(String args[]) throws IOException
@@ -60,8 +60,8 @@ public class ManifoldRank {
         myDoc.readfile(myfile.list(),args[0],args[2],args[6]);
         
     	/* Calculate link weight matrix of sentences */
-    	myDoc.calc_tfidf(1, Integer.parseInt(args[5]));
-    	myDoc.calc_sim();
+    	myDoc.calcTfidf(1, Integer.parseInt(args[5]));
+    	myDoc.calcSim();
     	linkW = new double[myDoc.snum][myDoc.snum];
     	double[] sumISim = new double[myDoc.snum];
     	for(int i = 0; i < myDoc.snum; ++i) {
@@ -83,12 +83,12 @@ public class ManifoldRank {
     	}
     	
     	/* Calculate the ManifoldRank score of sentences */
-    	double[] u_old = new double[myDoc.snum];
+    	double[] uOld = new double[myDoc.snum];
     	double[] u = new double[myDoc.snum];
     	double[] y = new double[myDoc.snum];
     	
     	for(int i = 0; i < myDoc.snum; ++i) {
-    		u_old[i] = 1.0;
+    		uOld[i] = 1.0;
     		u[i] = 1.0;
     		y[i] = 0.0;
     	}
@@ -97,20 +97,20 @@ public class ManifoldRank {
     	double eps = 0.00001, alpha = 0.6 , minus = 1.0;
     			
     	while (minus > eps) {
-    		u_old = u;
+    		uOld = u;
 			for (int i = 0; i < myDoc.snum; i++) {
 				double sumSim = 0.0;
 				for (int j = 0; j < myDoc.snum; j++) {
 					if(j == i) continue;
 					else {
-						sumSim = sumSim + linkW[j][i] * u_old[j];
+						sumSim = sumSim + linkW[j][i] * uOld[j];
 					}
 				}
 				u[i] = alpha * sumSim + (1 - alpha) * y[i];
 			}
 			minus = 0.0;
 			for (int j = 0; j < myDoc.snum; j++) {
-				double add = java.lang.Math.abs(u[j] - u_old[j]);
+				double add = java.lang.Math.abs(u[j] - uOld[j]);
 				minus += add;
 			}
     	}
@@ -128,22 +128,22 @@ public class ManifoldRank {
     	/* Remove redundancy and get the abstract */
     	u[0] = 0.0;
     	if (args[7].equals("-1"))
-    		myDoc.pick_sentence_sumPun(u, threshold);
+    		myDoc.pickSentenceSumpun(u, threshold);
     	else if (args[7].equals("1"))
-            myDoc.pick_sentence_MMR(u, threshold, Beta);
+            myDoc.pickSentenceMMR(u, threshold, Beta);
         else if (args[7].equals("2"))
-            myDoc.pick_sentence_threshold(u, threshold, Beta);
+            myDoc.pickSentenceThreshold(u, threshold, Beta);
         else if (args[7].equals("3"))
-            myDoc.pick_sentence_sumPun(u, threshold);
+            myDoc.pickSentenceSumpun(u, threshold);
     	
         /* Output the abstract */
     	try{
     		File outfile = new File(args[1]);
     		OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(outfile),"utf-8");
     		BufferedWriter writer = new BufferedWriter(write);
-    		for (int i : myDoc.summary_id){
-                //System.out.println(myDoc.original_sen.get(i));
-    			writer.write(myDoc.original_sen.get(i));
+    		for (int i : myDoc.summaryId){
+                //System.out.println(myDoc.originalSen.get(i));
+    			writer.write(myDoc.originalSen.get(i));
     			writer.write("\n");
             }
     		writer.close();

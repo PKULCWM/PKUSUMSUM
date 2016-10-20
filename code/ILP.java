@@ -33,7 +33,7 @@ import lpsolve.*;
  * */
 
 public class ILP {
-	public doc myDoc = new doc();
+	public Doc myDoc = new Doc();
 	public ArrayList<HashMap<String, Double> > sentenceTfIdf;
 	public HashMap<String, Double> allConcepts;
 	public ArrayList<String> content;
@@ -51,10 +51,10 @@ public class ILP {
     	/* Read files */
     	if (args[3].equals("1"))
         {
-    		String[] single_file = new String[1];
-            single_file[0] = args[0];
+    		String[] singleFile = new String[1];
+            singleFile[0] = args[0];
             myDoc.maxlen = Integer.parseInt(args[4]);
-            myDoc.readfile(single_file, " ", args[2], args[6]);
+            myDoc.readfile(singleFile, " ", args[2], args[6]);
         }
     	else if (args[3].equals("2"))
         {
@@ -65,13 +65,13 @@ public class ILP {
         }
     	
     	/* Calculate tf*idf */    	
-    	myDoc.calc_tfidf(Integer.parseInt(args[3]), Integer.parseInt(args[5]));
-    	myDoc.calc_sim();
+    	myDoc.calcTfidf(Integer.parseInt(args[3]), Integer.parseInt(args[5]));
+    	myDoc.calcSim();
     	
     	/* Get S array store the length of sentences */
     	S = new double[myDoc.snum];
     	for(int i = 0; i < myDoc.snum; ++i) {
-    		S[i] = (double) myDoc.sen_len.get(i);
+    		S[i] = (double) myDoc.senLen.get(i);
     	}
     	
     	/* Get all concepts */
@@ -93,7 +93,7 @@ public class ILP {
 		HashMap<Integer, Integer> choose = new HashMap<Integer,Integer>();
 		for(int i = 0; i < myDoc.snum; ++i) {
 			if(yesOrNo[i] == 1.0) {
-				wordNum += myDoc.sen_len.get(i);
+				wordNum += myDoc.senLen.get(i);
 				choose.put(i, i);
 			}
 		}
@@ -101,17 +101,17 @@ public class ILP {
 			int num = 0;
 			while(wordNum <= myDoc.maxlen && num < myDoc.snum) {
 				if(!choose.containsKey(num)){
-					wordNum += myDoc.sen_len.get(num);
+					wordNum += myDoc.senLen.get(num);
 					choose.put(num, num);
 				}
 				num ++;
 			}
 		}
-		Object[] key_arr = choose.keySet().toArray();     
-		Arrays.sort(key_arr);     
-		for  (Object key : key_arr) {     
+		Object[] keyArr = choose.keySet().toArray();
+		Arrays.sort(keyArr);
+		for  (Object key : keyArr) {
 		    Object value = choose.get(key);
-		    content.add(myDoc.original_sen.get((int)(value)));
+		    content.add(myDoc.originalSen.get((int)(value)));
 		}
         
         /* Output the abstract */
@@ -120,7 +120,7 @@ public class ILP {
     		OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(outfile),"utf-8");
     		BufferedWriter writer = new BufferedWriter(write);
     		for (String i : content){
-                //System.out.println(myDoc.original_sen.get(i));
+                //System.out.println(myDoc.originalSen.get(i));
     			writer.write(i);
     			writer.write("\n");
             }
@@ -143,9 +143,9 @@ public class ILP {
 			ArrayList<String> labels = allSpaceComments.get(i);
 			for (int j = 0; j < labels.size(); j++) {
 				if (Label.containsKey(labels.get(j))) {
-					Label.put(labels.get(j), Label.get(labels.get(j)) + 1.0/labels.size());
+					Label.put(labels.get(j), Label.get(labels.get(j)) + 1.0 / labels.size());
 				} else {				
-					Label.put(labels.get(j), 1.0/labels.size());
+					Label.put(labels.get(j), 1.0 / labels.size());
 					
 				}
 			}
@@ -163,7 +163,7 @@ public class ILP {
 				for(int j = 0; j < sizeOfComment; j++) {
 					HashMap<String, Double> now = sentenceTfIdf.get(j);
 					if (now.containsKey(key)) { 
-						IDF = IDF+1;
+						IDF = IDF + 1;
 					} 
 				}
 				double idf = Math.log(sizeOfComment / IDF);
@@ -298,8 +298,8 @@ public class ILP {
        if(ret == 0) {
     	   lp.setAddRowmode(false); /* Rowmode should be turned off again when done building the model */
     	   int[] colno = new int[conNum];
-  		  double[] row = new double[conNum];
-  		  numOfCon = 0;
+    	   double[] row = new double[conNum];
+    	   numOfCon = 0;
 		      for(int i = 0; i < conNum; i++) {
 		    	  numOfCon ++;
 		    	  colno[i] = i+1+myDoc.snum;
@@ -372,7 +372,4 @@ public class ILP {
 		}
 	}
 	
-
-	
-		
 }

@@ -37,20 +37,20 @@ import java.util.TreeSet;
  * */
 
 public class ClusterCMRW {
-    public doc myDoc = new doc();//some basic information about doc
+    public Doc myDoc = new Doc();//some basic information about doc
     public int k;//Kmeans-k
     public ArrayList<TreeSet<Integer>> cluster = new ArrayList<>();//cluster_center
-    public TreeSet<Integer> docVector;
+    public TreeSet<Integer> docVector; //the vector of the document
     public double[] cdSim;// the similarity between cluster and doc
     public double[] scSim;//the similarity between sentence and cluster
     public double[] sdSim;//the similarity between sentence and doc
-    public ArrayList<Integer> d_tf;// tf vector of doc
-    public ArrayList<ArrayList<Integer>> c_tf;// tf vector of cluster
-    public ArrayList<Integer> c_len;//length of the cluster vector
-    public int d_len;// length of the doc vector
-    public int[] belong;
+    public ArrayList<Integer> dTf;// tf vector of doc
+    public ArrayList<ArrayList<Integer>> cTf;// tf vector of cluster
+    public ArrayList<Integer> cLen;//length of the cluster vector
+    public int dLen;// length of the doc vector
+    public int[] belong;// the cluster center that sentence belongs to
     public double[] score;//score of the sentence
-    public double Lambda,Mu,Alpha,Beta;
+    public double Lambda,Mu,Alpha,Beta;//parameter
     
     public void Summarize(String args[]) throws IOException
     {
@@ -63,17 +63,19 @@ public class ClusterCMRW {
 			return;
 		}
     	
-        myDoc = new doc();
+        myDoc = new Doc();
         File myfile = new File(args[0]);
         myDoc.readfile(myfile.list(),args[0],args[2],args[6]);
+        //allow the length of summary to exceed 20
         myDoc.maxlen = Integer.parseInt(args[4])+20;
         int sx = Integer.parseInt(args[5]);
-        myDoc.calc_tfidf(1, sx);;//1 represents use tf-isf vector;2 represent tf-idf vector
-        myDoc.calc_sim();
+        myDoc.calcTfidf(1, sx);//1 represents use tf-isf vector;2 represent tf-idf vector
+        myDoc.calcSim();
         Alpha = 0.3;
         Lambda = 0.85;
         Beta = 0.1;
         Mu = 0.85;
+        // get the parameter
         if (Double.parseDouble(args[10])>=0){
             Alpha = Double.parseDouble(args[10]);
         }
@@ -86,31 +88,31 @@ public class ClusterCMRW {
         k = (int)(myDoc.snum * Alpha);
 
         Kmeans();
-        generate_docVector();
-        calc_cdSim();
-        calc_scSim();
+        generateDocVector();
+        calcCdSim();
+        calcScSim();
         CMRW();
 
         /* Remove redundancy and get the abstract */
         if (args[7].equals("-1"))
-            myDoc.pick_sentence_MMR(score,Double.parseDouble(args[8]),Beta);
+            myDoc.pickSentenceMMR(score,Double.parseDouble(args[8]),Beta);
         if (args[7].equals("1"))
-            myDoc.pick_sentence_MMR(score,Double.parseDouble(args[8]),Beta);
+            myDoc.pickSentenceMMR(score,Double.parseDouble(args[8]),Beta);
         else
         if (args[7].equals("2"))
-            myDoc.pick_sentence_threshold(score, Double.parseDouble(args[8]),Beta);
+            myDoc.pickSentenceThreshold(score, Double.parseDouble(args[8]),Beta);
         else
         if (args[7].equals("3"))
-            myDoc.pick_sentence_sumPun(score,Double.parseDouble(args[8]));
+            myDoc.pickSentenceSumpun(score,Double.parseDouble(args[8]));
 
         /* Output the abstract */
     	try{
     		File outfile = new File(args[1]);
     		OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(outfile),"utf-8");
     		BufferedWriter writer = new BufferedWriter(write);
-    		for (int i : myDoc.summary_id){
-                //System.out.println(myDoc.original_sen.get(i));
-    			writer.write(myDoc.original_sen.get(i));
+    		for (int i : myDoc.summaryId){
+                //System.out.println(myDoc.originalSen.get(i));
+    			writer.write(myDoc.originalSen.get(i));
     			writer.write("\n");
             }
     		writer.close();
@@ -121,50 +123,56 @@ public class ClusterCMRW {
     	}
     }
 
-    public void calc_cdSim(){
+    // calculate the similarity between cluster and document
+    public void calcCdSim(){
         cdSim = new double[k];
         for (int i = 0; i < k; i++){
-            cdSim[i] = myDoc.calc_cos(cluster.get(i),c_tf.get(i),c_len.get(i),docVector,d_tf,d_len);
+            cdSim[i] = myDoc.calcCos(cluster.get(i), cTf.get(i), cLen.get(i),docVector, dTf, dLen);
         }
 
     }
 
-    public void calc_scSim(){
+    // calculate the similarity between cluster and sentence
+    public void calcScSim(){
         scSim = new double[myDoc.snum];
         sdSim = new double[myDoc.snum];
         for (int i = 0; i < myDoc.snum; i++) {
-            scSim[i] = myDoc.calc_cos(myDoc.vector.get(i),myDoc.s_tf.get(i),myDoc.word_len.get(i), cluster.get(belong[i]),c_tf.get(belong[i]),c_len.get(belong[i]));
+            scSim[i] = myDoc.calcCos(myDoc.sVector.get(i),myDoc.sTf.get(i),myDoc.wordLen.get(i), cluster.get(belong[i]), cTf.get(belong[i]), cLen.get(belong[i]));
             sdSim[i] = scSim[i] * cdSim[belong[i]];
         }
     }
 
-    public void generate_docVector(){
-        int[] tmp_tf = new int[myDoc.wnum];
+    // get the vector of the document
+    public void generateDocVector(){
+        int[] tmptf = new int[myDoc.wnum];
         docVector = new TreeSet<>();
-        d_tf = new ArrayList<>();
+        dTf = new ArrayList<>();
         for (int i = 0; i < myDoc.snum; i++){
             int id = 0;
-            for (int j : myDoc.vector.get(i)){
-                tmp_tf[j] += myDoc.s_tf.get(i).get(id);
+            for (int j : myDoc.sVector.get(i)){
+                tmptf[j] += myDoc.sTf.get(i).get(id);
                 id++;
             }
         }
         for (int i = 0; i < myDoc.wnum; i++){
-            if (tmp_tf[i] != 0){
+            if (tmptf[i] != 0){
                 docVector.add(i);
-                d_tf.add(tmp_tf[i]);
-                d_len += tmp_tf[i];
+                dTf.add(tmptf[i]);
+                dLen += tmptf[i];
             }
         }
     }
 
+    //CMRW algorithm
     public void CMRW(){
-        double[] last_score = new double[myDoc.snum];
+        double[] lastScore = new double[myDoc.snum];
         score = new double[myDoc.snum];
         for (int i = 0; i < myDoc.snum; i++){
             score[i] = 1 / myDoc.snum;
-            last_score[i] = score[i];
+            lastScore[i] = score[i];
         }
+
+        //iterate until converges; similar to PageRank
         boolean change = true;
         while (change){
             for (int i = 0; i < myDoc.snum; i++)
@@ -177,24 +185,26 @@ public class ClusterCMRW {
                 if (sum == 0) continue;
                 for (int j = 0; j < myDoc.snum; j++)
                 if (i != j)
-                    score[j] += Mu * last_score[i] * myDoc.sim[i][j] * (Lambda * sdSim[i] + (1 - Lambda) * sdSim[j]) / sum;
+                    score[j] += Mu * lastScore[i] * myDoc.sim[i][j] * (Lambda * sdSim[i] + (1 - Lambda) * sdSim[j]) / sum;
             }
             change = false;
             for (int i = 0; i < myDoc.snum; i++)
-                if (Math.abs(score[i] - last_score[i]) > 1e-5){
+                if (Math.abs(score[i] - lastScore[i]) > 1e-5){
                     change = true;
                     break;
                 }
             for (int i = 0; i < myDoc.snum; i++)
-                last_score[i] = score[i];
+                lastScore[i] = score[i];
         }
     }
 
+    //using Kmeans to clustering
     public void Kmeans(){
         boolean[] chosen = new boolean[myDoc.snum];
-        c_len = new ArrayList<>();
-        c_tf = new ArrayList<>();
+        cLen = new ArrayList<>();
+        cTf = new ArrayList<>();
         int maxdep = 2000;
+        //generate the initial cluster center
         cluster = new ArrayList<>();
         for (int i = 0; i < k; i++){
 
@@ -203,22 +213,25 @@ public class ClusterCMRW {
                 q = (int)(Math.random() * myDoc.snum);
             }
             chosen[q] = true;
-            cluster.add(myDoc.vector.get(q));
-            c_tf.add(myDoc.s_tf.get(q));
-            c_len.add(myDoc.word_len.get(q));
+            cluster.add(myDoc.sVector.get(q));
+            cTf.add(myDoc.sTf.get(q));
+            cLen.add(myDoc.wordLen.get(q));
         }
+
+        //iterate until converges
         boolean change = true;
         belong = new int[myDoc.snum];
-        int[] last_belong = new int[myDoc.snum];
+        int[] lastBelong = new int[myDoc.snum];
         while (change){
             maxdep--;
             if (maxdep == 0) break;
             for (int i = 0; i < myDoc.snum; i++)
-                last_belong[i] = belong[i];
+                lastBelong[i] = belong[i];
+            // find the nearest cluster center
             for (int i = 0; i < myDoc.snum; i++){
                 double minDis = 0;
                 for (int j = 0; j < k; j++){
-                    double dis = myDoc.calc_cos(myDoc.vector.get(i),myDoc.s_tf.get(i),myDoc.word_len.get(i),cluster.get(j),c_tf.get(j),c_len.get(j));
+                    double dis = myDoc.calcCos(myDoc.sVector.get(i),myDoc.sTf.get(i),myDoc.wordLen.get(i),cluster.get(j), cTf.get(j), cLen.get(j));
                     if (dis > minDis){
                         minDis = dis;
                         belong[i] = j;
@@ -226,37 +239,39 @@ public class ClusterCMRW {
                 }
             }
 
+            //update
             change = false;
             for (int i = 0; i < myDoc.snum; i++)
-                if (last_belong[i] != belong[i]){
+                if (lastBelong[i] != belong[i]){
                     change = true;
                     break;
                 }
+            //update the cluster center
             if (change){
-                c_tf = new ArrayList<>();
+                cTf = new ArrayList<>();
                 cluster = new ArrayList<>();
-                c_len = new ArrayList<>();
-                int[][] tmp_tf = new int[k][myDoc.wnum];
-                int[] tmp_len = new int[k];
+                cLen = new ArrayList<>();
+                int[][] tmpTf = new int[k][myDoc.wnum];
+                int[] tmpLen = new int[k];
                 for (int i = 0; i < myDoc.snum; i++){
                     int id = 0;
-                    for (int j : myDoc.vector.get(i)){
-                        tmp_tf[belong[i]][j] += myDoc.s_tf.get(i).get(id);
-                        tmp_len[belong[i]] += myDoc.s_tf.get(i).get(id);
+                    for (int j : myDoc.sVector.get(i)){
+                        tmpTf[belong[i]][j] += myDoc.sTf.get(i).get(id);
+                        tmpLen[belong[i]] += myDoc.sTf.get(i).get(id);
                         id++;
                     }
                 }
                 for (int i = 0; i < k; i++){
-                    ArrayList<Integer> tp_tf = new ArrayList<>();
-                    TreeSet<Integer> tp_vector = new TreeSet<>();
+                    ArrayList<Integer> tpTf = new ArrayList<>();
+                    TreeSet<Integer> tpVector = new TreeSet<>();
                     for (int j = 0; j < myDoc.wnum; j++)
-                        if (tmp_tf[i][j] != 0){
-                            tp_tf.add(tmp_tf[i][j]);
-                            tp_vector.add(j);
+                        if (tmpTf[i][j] != 0){
+                            tpTf.add(tmpTf[i][j]);
+                            tpVector.add(j);
                         }
-                    c_tf.add(tp_tf);
-                    cluster.add(tp_vector);
-                    c_len.add(tmp_len[i]);
+                    cTf.add(tpTf);
+                    cluster.add(tpVector);
+                    cLen.add(tmpLen[i]);
                 }
             }
         }

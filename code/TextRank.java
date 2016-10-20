@@ -35,7 +35,7 @@ import java.util.Iterator;
 
 
 public class TextRank {
-	public doc myDoc = new doc();
+	public Doc myDoc = new Doc();
     public int sumNum = 0;
     public double[][] similarity;
     
@@ -49,10 +49,10 @@ public class TextRank {
     	/* Read files */
     	if (args[3].equals("1"))
         {
-    		String[] single_file = new String[1];
-            single_file[0] = args[0];
+    		String[] singleFile = new String[1];
+            singleFile[0] = args[0];
             myDoc.maxlen = Integer.parseInt(args[4]);
-            myDoc.readfile(single_file, " ", args[2], args[6]);
+            myDoc.readfile(singleFile, " ", args[2], args[6]);
         }
     	else if (args[3].equals("2"))
         {
@@ -63,8 +63,8 @@ public class TextRank {
         }
     	
     	/* Calculate similarity matrix of sentences */
-    	myDoc.calc_tfidf(Integer.parseInt(args[3]), Integer.parseInt(args[5]));
-    	myDoc.calc_sim();
+    	myDoc.calcTfidf(Integer.parseInt(args[3]), Integer.parseInt(args[5]));
+    	myDoc.calcSim();
     	similarity = new double[myDoc.snum][myDoc.snum];
     	for(int i = 0; i < myDoc.snum; ++i) {
     		double sumISim= 0.0;
@@ -72,13 +72,13 @@ public class TextRank {
     			if(i == j) similarity[i][j] = 0.0;
     			else {
     				int tmpNum = 0;
-    				for(Iterator<Integer> iter = myDoc.vector.get(i).iterator(); iter.hasNext(); ) { 
+    				for(Iterator<Integer> iter = myDoc.sVector.get(i).iterator(); iter.hasNext(); ) {
     					int now = iter.next();
-    					if(myDoc.vector.get(j).contains(now)){
+    					if(myDoc.sVector.get(j).contains(now)){
         					tmpNum++;
         				}
     				} 
-    				similarity[i][j] = tmpNum / ( Math.log(1.0 * myDoc.sen_len.get(i)) + Math.log(1.0 * myDoc.sen_len.get(j)));
+    				similarity[i][j] = tmpNum / ( Math.log(1.0 * myDoc.senLen.get(i)) + Math.log(1.0 * myDoc.senLen.get(j)));
     			}
     			sumISim += similarity[i][j];
         	}
@@ -94,23 +94,23 @@ public class TextRank {
     	}
     	
     	//Calculate the TextRank score of sentences
-    	double[] u_old = new double[myDoc.snum];
+    	double[] uOld = new double[myDoc.snum];
     	double[] u = new double[myDoc.snum];
     	for(int i = 0; i < myDoc.snum; ++i) {
-    		u_old[i] = 1.0;
+    		uOld[i] = 1.0;
     		u[i] = 1.0;
     	}
     			
     	double eps = 0.00001, alpha = 0.85 , minus = 1.0;
     			
     	while (minus > eps) {
-    		u_old = u;
+    		uOld = u;
 			for (int i = 0; i < myDoc.snum; i++) {
 				double sumSim = 0.0;
 				for (int j = 0; j < myDoc.snum; j++) {
 					if(j == i) continue;
 					else {
-						sumSim = sumSim + similarity[j][i] * u_old[j];
+						sumSim = sumSim + similarity[j][i] * uOld[j];
 					}
 					
 				}
@@ -118,7 +118,7 @@ public class TextRank {
 			}
 			minus = 0.0;
 			for (int j = 0; j < myDoc.snum; j++) {
-				double add = java.lang.Math.abs(u[j] - u_old[j]);
+				double add = java.lang.Math.abs(u[j] - uOld[j]);
 				minus += add;
 			}
     	}
@@ -135,13 +135,13 @@ public class TextRank {
     		
     	/* Remove redundancy and get the abstract */
     	if (args[7].equals("-1"))
-			myDoc.pick_sentence_MMR(u, threshold, Beta);
+			myDoc.pickSentenceMMR(u, threshold, Beta);
     	else if (args[7].equals("1"))
-            myDoc.pick_sentence_MMR(u, threshold, Beta);
+            myDoc.pickSentenceMMR(u, threshold, Beta);
         else if (args[7].equals("2"))
-            myDoc.pick_sentence_threshold(u, threshold, Beta);
+            myDoc.pickSentenceThreshold(u, threshold, Beta);
         else if (args[7].equals("3"))
-            myDoc.pick_sentence_sumPun(u, threshold);
+            myDoc.pickSentenceSumpun(u, threshold);
     	
     	
         /* Output the abstract */
@@ -149,9 +149,9 @@ public class TextRank {
     		File outfile = new File(args[1]);
     		OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(outfile),"utf-8");
     		BufferedWriter writer = new BufferedWriter(write);
-    		for (int i : myDoc.summary_id){
-                //System.out.println(myDoc.original_sen.get(i));
-    			writer.write(myDoc.original_sen.get(i));
+    		for (int i : myDoc.summaryId){
+                //System.out.println(myDoc.originalSen.get(i));
+    			writer.write(myDoc.originalSen.get(i));
     			writer.write("\n");
             }
     		writer.close();

@@ -27,8 +27,8 @@ import java.util.ArrayList;
  * */
 
 public class Lead {
-	public doc myDoc = new doc();
-    public ArrayList<Integer> summary_id = new ArrayList<>();
+	public Doc myDoc = new Doc();
+    public ArrayList<Integer> summaryId = new ArrayList<>();
     public int sumNum = 0;
     
     public void Summarize(String args[]) throws IOException
@@ -37,10 +37,10 @@ public class Lead {
     	/* Read files */
     	if (args[3].equals("1"))
         {
-    		String[] single_file = new String[1];
-            single_file[0] = args[0];
+    		String[] singleFile = new String[1];
+            singleFile[0] = args[0];
             myDoc.maxlen = Integer.parseInt(args[4]);
-            myDoc.readfile(single_file, " ", args[2], args[6]);
+            myDoc.readfile(singleFile, " ", args[2], args[6]);
         }
     	else if (args[3].equals("2")|| args[3].equals("3"))
         {
@@ -52,8 +52,8 @@ public class Lead {
     	/* Get abstract */
     	int tmp = 0;
         while(sumNum <= myDoc.maxlen && tmp < myDoc.snum) {
-        	summary_id.add(tmp);
-        	sumNum += myDoc.sen_len.get(tmp);
+        	summaryId.add(tmp);
+        	sumNum += myDoc.senLen.get(tmp);
         	tmp++;
         }
         
@@ -62,9 +62,9 @@ public class Lead {
     		File outfile = new File(args[1]);
     		OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(outfile),"utf-8");
     		BufferedWriter writer = new BufferedWriter(write);
-    		for (int i : summary_id){
-                //System.out.println(myDoc.original_sen.get(i));
-    			writer.write(myDoc.original_sen.get(i));
+    		for (int i : summaryId){
+                //System.out.println(myDoc.originalSen.get(i));
+    			writer.write(myDoc.originalSen.get(i));
     			writer.write("\n");
             }
     		writer.close();

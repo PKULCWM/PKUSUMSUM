@@ -15,20 +15,52 @@ import org.ansj.domain.Term;
 import org.ansj.splitWord.analysis.ToAnalysis;
 
 public class Tokenizer {
-    public ArrayList<String> passage=new ArrayList<String>();
-    public ArrayList<Integer> senLen=new ArrayList<Integer>();
-    public ArrayList<String> sentence=new ArrayList<String>();
-    public ArrayList<ArrayList<String>> word=new ArrayList<ArrayList<String>>();
-    public ArrayList<ArrayList<String>> stemmerWord=new ArrayList<ArrayList<String>>();
-    HashMap<String,Integer> stopword=new HashMap<String,Integer>();
+    public ArrayList<String> passage = new ArrayList<String>();
+    public ArrayList<Integer> senLen = new ArrayList<Integer>();
+    public ArrayList<String> sentence = new ArrayList<String>();
+    public ArrayList<ArrayList<String>> word = new ArrayList<ArrayList<String>>();
+    public ArrayList<ArrayList<String>> stemmerWord = new ArrayList<ArrayList<String>>();
+    HashMap<String,Integer> stopword = new HashMap<String,Integer>();
     public void readStopwords(String stopwordPath) throws IOException
     {	
-		File tmpfile =new File(stopwordPath);
+		File tmpfile = new File(stopwordPath);
 		if (!tmpfile.exists()){
 			System.out.println("stopwords file does not exist!");
 			System.exit(0);
 		}
-    	FileReader inFReader=new FileReader(stopwordPath);
+    	FileReader inFReader = new FileReader(stopwordPath);
+        BufferedReader inBReader = new BufferedReader(inFReader);
+        String tmpWord;
+        int i = 0;
+        while((tmpWord = inBReader.readLine())!= null)
+        {
+            i++;
+            stopword.put(tmpWord, i);
+        }
+        inBReader.close();
+    }
+    
+    public void readStopwordsEng() throws IOException
+    {
+    	
+    	InputStream stop = Tokenizer.class.getClassLoader().getResourceAsStream("stopword_Eng");
+    	BufferedReader inBReader = new BufferedReader(new InputStreamReader(stop));
+        String tmpWord;
+        int i=0;
+        while((tmpWord = inBReader.readLine()) != null){
+        	i++;
+            stopword.put(tmpWord, i);
+        }
+        inBReader.close();
+    	
+    }
+    
+    /*For source code 
+     * 
+     * public void readStopwordsEng() throws IOException
+    {
+    	
+    	FileReader inFReader=new FileReader("stopword_Eng");
         BufferedReader inBReader=new BufferedReader(inFReader);
         String tmpWord;
         int i=0;
@@ -38,17 +70,22 @@ public class Tokenizer {
             stopword.put(tmpWord, i);
         }
         inBReader.close();
+    	
     }
-	
-    public boolean ifWords_Eng(String tmpWord)
+     * 
+     * 
+     * */
+    
+    
+    public boolean ifWordsEng(String tmpWord)
     {
-        if (tmpWord.charAt(0)>='A' && tmpWord.charAt(0)<='Z') return true;
-        if (tmpWord.charAt(0)>='a' && tmpWord.charAt(0)<='z') return true;
+        if (tmpWord.charAt(0) >= 'A' && tmpWord.charAt(0) <= 'Z') return true;
+        if (tmpWord.charAt(0) >= 'a' && tmpWord.charAt(0) <= 'z') return true;
         return false;
     }
     public boolean ifStopwords(String tmpWord)
     {
-        if (stopword.get(tmpWord.toLowerCase())!=null) return true;
+        if (stopword.get(tmpWord.toLowerCase())!= null) return true;
         return false;
     }
 
@@ -70,47 +107,48 @@ public class Tokenizer {
     	}
     }
     
-    public ArrayList<String> tokenize_Eng(String inFile, String stopwordPath) throws IOException
+    public ArrayList<String> tokenizeEng(String inFile, String stopwordPath) throws IOException
     {
         PTBTokenizer<CoreLabel> ptbt = new PTBTokenizer<>(new FileReader(inFile),
                 new CoreLabelTokenFactory(), "");
-        int len=0;
-        int wlen=0;
+        int len = 0;
+        int wlen = 0;
 		if (stopwordPath.equals("y"))
-			readStopwords("stopword_Eng");
+			readStopwordsEng();
 		else
 		if (!stopwordPath.equals("n"))
 			readStopwords(stopwordPath);
         String token,tmpSen;
-        tmpSen=new String();
-        boolean ifend=false;
+        tmpSen = new String();
+        boolean ifend = false;
         while (ptbt.hasNext())
         {
             CoreLabel label = ptbt.next();
             token=label.toString();
 
-            if (ifend==false)
+            if (ifend == false)
             {
 
                 if (token.equals(".") || token.equals("?") ||token.equals("!"))
                 {
                     ifend=true;
                 }
+                //remove some invalit symbols
                 if (token.equals("-LRB-") || token.equals("-RRB-") || token.equals("-LCB-")|| token.equals("-RCB-") || token.equals("\""))
                     continue;
                 if (token.equals("'") || token.equals("`") || token.equals("''") || token.equals("``") || token.equals("_") || token.equals("--") || token.equals("-")){
                     continue;
                 }
                 if (token.equals("'s") || token.equals(".") || token.equals("?") || token.equals("!") || token.equals(",") || token.equals("'re") || (token.equals("'ve")))
-                    tmpSen+=token;
+                    tmpSen += token;
                 else
-                tmpSen+=" "+token;
+                tmpSen += " " + token;
 
-                if (ifWords_Eng(token))
+                if (ifWordsEng(token))
                     wlen++;
                 if (!token.equals("'s"))
                     len++;
-                if (ifWords_Eng(token) && !ifStopwords(token))
+                if (ifWordsEng(token) && !ifStopwords(token))
                     sentence.add(token.toLowerCase());
             }else
             {
@@ -120,28 +158,28 @@ public class Tokenizer {
                 if (token.equals("."))
                 {
 
-                    tmpSen+=token;
+                    tmpSen += token;
                     len++;
                 }else
                 {
-                    if (len>1 && wlen*2>=len) {
+                    if (len > 1 && wlen * 2 >= len) {
                         passage.add(tmpSen);
                         senLen.add(len);
                         word.add(sentence);
                     }
-                    ifend=false;
-                    tmpSen=token;
-                    sentence=new ArrayList<String>();
-                    wlen=0;
-                    if (ifWords_Eng(token))
+                    ifend = false;
+                    tmpSen = token;
+                    sentence = new ArrayList<String>();
+                    wlen = 0;
+                    if (ifWordsEng(token))
                         wlen++;
-                    len=1;
-                    if (ifWords_Eng(token) && !ifStopwords(token))
+                    len = 1;
+                    if (ifWordsEng(token) && !ifStopwords(token))
                         sentence.add(token.toLowerCase());
                 }
             }
         }
-        if (ifend && len>1 && wlen*2>=len)
+        if (ifend && len > 1 && wlen * 2 >= len)
         {
             passage.add(tmpSen);
             word.add(sentence);
@@ -151,9 +189,9 @@ public class Tokenizer {
         return passage;
     }
 
-    public ArrayList<String> tokenize_Chn(String inFile, String stopwordPath) throws IOException
+    public ArrayList<String> tokenizeChn(String inFile, String stopwordPath) throws IOException
     {
-        StringBuffer buffer=new StringBuffer();
+        StringBuffer buffer = new StringBuffer();
         String line; 
 		if (!stopwordPath.equals("n") && !stopwordPath.equals("y"))
 			readStopwords(stopwordPath);
@@ -167,15 +205,15 @@ public class Tokenizer {
         reader.close();
         Pattern pattern = Pattern.compile(".*?[¡££¿£¡]");
         Matcher matcher = pattern.matcher(buffer);
-        Pattern p2=Pattern.compile("[\u4e00-\u9fa5]");
+        Pattern p2 = Pattern.compile("[\u4e00-\u9fa5]");
         while (matcher.find()) {
-            String sen=matcher.group();
+            String sen = matcher.group();
             passage.add(sen);
             senLen.add(sen.length());
-            List<Term> parse=ToAnalysis.parse(sen);
-            ArrayList<String> tmpsen=new ArrayList<>();
+            List<Term> parse = ToAnalysis.parse(sen);
+            ArrayList<String> tmpsen = new ArrayList<>();
             for (Term x:parse){
-                Matcher m2=p2.matcher(x.getName());
+                Matcher m2 = p2.matcher(x.getName());
                 if (m2.find()) {
 					if (!ifStopwords(x.getName()))
                     tmpsen.add(x.getName());

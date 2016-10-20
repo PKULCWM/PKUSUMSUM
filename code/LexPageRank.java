@@ -34,7 +34,7 @@ import java.io.OutputStreamWriter;
  * */
 
 public class LexPageRank {
-	public doc myDoc = new doc();
+	public Doc myDoc = new Doc();
     public int sumNum = 0;
     public int[][] linkOrNot;
     public int[] C;
@@ -49,10 +49,10 @@ public class LexPageRank {
     	/* Read files */
     	if (args[3].equals("1"))
         {
-    		String[] single_file = new String[1];
-            single_file[0] = args[0];
+    		String[] singleFile = new String[1];
+            singleFile[0] = args[0];
             myDoc.maxlen = Integer.parseInt(args[4]);
-            myDoc.readfile(single_file, " ", args[2], args[6]);
+            myDoc.readfile(singleFile, " ", args[2], args[6]);
         }
     	else if (args[3].equals("2"))
         {
@@ -63,8 +63,8 @@ public class LexPageRank {
         }
     	
     	/* Calculate sentences' similarity matrix and construct link or not matrix depending on the similarity matrix */
-    	myDoc.calc_tfidf(Integer.parseInt(args[3]), Integer.parseInt(args[5]));
-    	myDoc.calc_sim();
+    	myDoc.calcTfidf(Integer.parseInt(args[3]), Integer.parseInt(args[5]));
+    	myDoc.calcSim();
     	C = new int[myDoc.snum];
     	linkOrNot = new int[myDoc.snum][myDoc.snum];
     	double linkThresh = 0.1;
@@ -85,29 +85,29 @@ public class LexPageRank {
     	}
     	
     	/* Calculate the lexPageRank score of sentences */
-		double[] u_old = new double[myDoc.snum];
+		double[] uOld = new double[myDoc.snum];
 		double[] u = new double[myDoc.snum];
 		for(int i = 0; i < myDoc.snum; ++i) {
-			u_old[i] = 1;
+			uOld[i] = 1;
 			u[i] = 1;
 		}
 		
 		double eps = 0.00001, alpha = 0.85 , minus = 1.0;
 		
 		while (minus > eps) {
-			u_old = u;
+			uOld = u;
 			for (int i = 0; i < myDoc.snum; ++i) {
 				double nowSum = 0.0;
 			    for(int j = 0; j < myDoc.snum; ++j) {
 			    	if(linkOrNot[i][j] == 1) {
-			    		nowSum = nowSum + u_old[j] / (1.0 * C[j]);
+			    		nowSum = nowSum + uOld[j] / (1.0 * C[j]);
 			    	}
 			    }
 			    u[i] = (1 - alpha) + alpha * nowSum;
 			}
 			minus = 0.0;
 			for (int i = 0; i < myDoc.snum; i++) {
-				double add = java.lang.Math.abs(u[i] - u_old[i]);
+				double add = java.lang.Math.abs(u[i] - uOld[i]);
 				minus += add;
 			}
 		}
@@ -125,24 +125,24 @@ public class LexPageRank {
 		
 		/* Remove redundancy and get the abstract */
 		if (args[7].equals("-1"))
-			myDoc.pick_sentence_MMR(u, threshold, Beta);
+			myDoc.pickSentenceMMR(u, threshold, Beta);
         if (args[7].equals("1"))
-            myDoc.pick_sentence_MMR(u, threshold, Beta);
+            myDoc.pickSentenceMMR(u, threshold, Beta);
         else
         if (args[7].equals("2"))
-            myDoc.pick_sentence_threshold(u, threshold, Beta);
+            myDoc.pickSentenceThreshold(u, threshold, Beta);
         else
         if (args[7].equals("3"))
-            myDoc.pick_sentence_sumPun(u, threshold);
+            myDoc.pickSentenceSumpun(u, threshold);
         
         /* Output the abstract */
     	try{
     		File outfile = new File(args[1]);
     		OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(outfile),"utf-8");
     		BufferedWriter writer = new BufferedWriter(write);
-    		for (int i : myDoc.summary_id){
-                //System.out.println(myDoc.original_sen.get(i));
-    			writer.write(myDoc.original_sen.get(i));
+    		for (int i : myDoc.summaryId){
+                //System.out.println(myDoc.originalSen.get(i));
+    			writer.write(myDoc.originalSen.get(i));
     			writer.write("\n");
             }
     		writer.close();

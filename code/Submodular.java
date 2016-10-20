@@ -34,9 +34,9 @@ import java.util.ArrayList;
 
 
 public class Submodular {
-    public doc myDoc = new doc();//some basic information about doc
-    public ArrayList<Integer> summary_id = new ArrayList<>();
-    public double Alpha,Beta,Lambda;
+    public Doc myDoc = new Doc();//some basic information about doc
+    public ArrayList<Integer> summaryId = new ArrayList<>();//the index of the sentence picked in the summary
+    public double Alpha, Beta, Lambda;//parameter
     int op;//op 1 represents use submodular function 1;else use submodular function 2
     public double[] sumSim;//the sum of similarity
     public void Summarize(String args[]) throws IOException
@@ -46,19 +46,20 @@ public class Submodular {
 			return;
 		}
     	
-        summary_id = new ArrayList<>();
-        myDoc = new doc();
+        summaryId = new ArrayList<>();
+        myDoc = new Doc();
         if (args[3].equals("1"))//single document
         {
             Alpha = 1.0/myDoc.snum*10;
             Beta = 0.1;
             Lambda = 0.5;
-            String[] single_file = new String[1];
-            single_file[0] = args[0];
+            String[] singleFile = new String[1];
+            singleFile[0] = args[0];
             op = Integer.parseInt(args[7]);
             if (op == 1){
                 Alpha = 1;
             }
+            // get the parameter
             if (Double.parseDouble(args[9]) >= 0){
                 Alpha = Double.parseDouble(args[9]);
             }
@@ -68,11 +69,13 @@ public class Submodular {
             if (Double.parseDouble(args[10]) >= 0){
                 Lambda = Double.parseDouble(args[10]);
             }
+            //allow the length of summary to exceed 20
             myDoc.maxlen = Integer.parseInt(args[4])+20;
-            myDoc.readfile(single_file," ",args[2],args[6]);
+            myDoc.readfile(singleFile," ",args[2],args[6]);
 			int sx = Integer.parseInt(args[5]);
-            myDoc.calc_tfidf(1, sx);
-            myDoc.calc_sim();
+            myDoc.calcTfidf(1, sx);
+            myDoc.calcSim();
+            //pick sentence with greed algorithm
             greedy();
             
             /* Output the abstract */
@@ -80,9 +83,9 @@ public class Submodular {
         		File outfile = new File(args[1]);
         		OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(outfile),"utf-8");
         		BufferedWriter writer = new BufferedWriter(write);
-        		for (int i : myDoc.summary_id){
-                    //System.out.println(myDoc.original_sen.get(i));
-        			writer.write(myDoc.original_sen.get(i));
+        		for (int i : myDoc.summaryId){
+                    //System.out.println(myDoc.originalSen.get(i));
+        			writer.write(myDoc.originalSen.get(i));
         			writer.write("\n");
                 }
         		writer.close();
@@ -100,8 +103,8 @@ public class Submodular {
             myDoc.maxlen = Integer.parseInt(args[4])+20;
             myDoc.readfile(myfile.list(),args[0],args[2],args[6]);
             int sx = Integer.parseInt(args[5]);
-            myDoc.calc_tfidf(1, sx);
-            myDoc.calc_sim();
+            myDoc.calcTfidf(1, sx);
+            myDoc.calcSim();
             op = Integer.parseInt(args[7]);
             Alpha = 1.0 / myDoc.snum*10;
             Beta = 0.1;
@@ -125,9 +128,8 @@ public class Submodular {
         		File outfile = new File(args[1]);
         		OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(outfile),"utf-8");
         		BufferedWriter writer = new BufferedWriter(write);
-        		for (int i : myDoc.summary_id){
-                    //System.out.println(myDoc.original_sen.get(i));
-        			writer.write(myDoc.original_sen.get(i));
+        		for (int i : myDoc.summaryId){
+        			writer.write(myDoc.originalSen.get(i));
         			writer.write("\n");
                 }
         		writer.close();
@@ -140,13 +142,14 @@ public class Submodular {
         }
     }
 
+    // submodular function 1
     public double submod1(int id)
     {
         double score = 0;
         for (int i = 0; i < myDoc.snum; i++){
             if (i == id) continue;
             double sum = 0;
-            for (int j : myDoc.summary_id)
+            for (int j : myDoc.summaryId)
             if (i != j)
                 sum += myDoc.sim[i][j];
             if (id != -1)
@@ -158,9 +161,11 @@ public class Submodular {
         }
         return score;
     }
+
+    // submodular function 2
     public double submod2(int id){
         double score=0;
-        for (int i : myDoc.summary_id) {
+        for (int i : myDoc.summaryId) {
             if (op == 1) {
                 score += myDoc.sim[id][i];
             } else {
@@ -171,7 +176,7 @@ public class Submodular {
         return -score;
     }
 
-    public void calc_sumSim(){
+    public void calcSumSim(){
         sumSim = new double[myDoc.snum];
         for (int i = 0; i < myDoc.snum; i++){
             sumSim[i] = 0;
@@ -185,13 +190,13 @@ public class Submodular {
     public void greedy(){
         boolean[] chosen = new boolean[myDoc.snum];
         int len=0;
-        calc_sumSim();
+        calcSumSim();
         while (true){
             double maxInc = -10, initScore = submod1(-1);
             int maxId = -1;
             for (int i = 0; i < myDoc.snum; i++){
-                if (!chosen[i] && len+myDoc.sen_len.get(i)<myDoc.maxlen){
-                    double inc = (Lambda * submod1(i) +(1-Lambda) * submod2(i) - initScore*Lambda)/Math.pow(myDoc.sen_len.get(i),Beta);
+                if (!chosen[i] && len+myDoc.senLen.get(i)<myDoc.maxlen){
+                    double inc = (Lambda * submod1(i) +(1- Lambda) * submod2(i) - initScore* Lambda)/Math.pow(myDoc.senLen.get(i), Beta);
                     if (inc > maxInc){
                         maxInc = inc;
                         maxId = i;
@@ -201,8 +206,8 @@ public class Submodular {
 
             if (maxId == -1) break;
             chosen[maxId] = true;
-            len += myDoc.sen_len.get(maxId);
-            myDoc.summary_id.add(maxId);
+            len += myDoc.senLen.get(maxId);
+            myDoc.summaryId.add(maxId);
             if (len >= myDoc.maxlen-20)
                 break;
         }

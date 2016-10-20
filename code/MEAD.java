@@ -37,7 +37,7 @@ import java.util.TreeSet;
 
 
 public class MEAD {
-	public doc myDoc = new doc();
+	public Doc myDoc = new Doc();
 	public double[] TfIdf;
     public double[] C;
     public double[] P;
@@ -51,10 +51,10 @@ public class MEAD {
     	/* Read files */
     	if (args[3].equals("1"))
         {
-    		String[] single_file = new String[1];
-            single_file[0] = args[0];
+    		String[] singleFile = new String[1];
+            singleFile[0] = args[0];
             myDoc.maxlen = Integer.parseInt(args[4]);
-            myDoc.readfile(single_file, " ", args[2],args[6]);
+            myDoc.readfile(singleFile, " ", args[2],args[6]);
         }
     	else if (args[3].equals("2"))
         {
@@ -73,14 +73,14 @@ public class MEAD {
         }
     	
     	/* Calculate tf*idf */
-    	myDoc.calc_tfidf(Integer.parseInt(args[3]), Integer.parseInt(args[5]));
-    	myDoc.calc_sim();
-    	int wordNum = myDoc.d_tf.size();
+    	myDoc.calcTfidf(Integer.parseInt(args[3]), Integer.parseInt(args[5]));
+    	myDoc.calcSim();
+    	int wordNum = myDoc.dTf.size();
     	
     	TfIdf = new double[wordNum];
     	double CMax = 0.0;
     	for(int i = 0; i < wordNum; ++i) {
-    		TfIdf[i] = myDoc.d_tf.get(i) * myDoc.idf[i];
+    		TfIdf[i] = myDoc.dTf.get(i) * myDoc.idf[i];
     		CMax += TfIdf[i];
     	}
     	
@@ -91,12 +91,12 @@ public class MEAD {
     	P = new double[myDoc.snum];
     	TreeSet<Integer> tmpSet = new TreeSet<Integer>();
     	for(int i = 0; i < myDoc.snum; ++i) {
-    		if(i >= myDoc.r_range[fNumNow]) {
+    		if(i >= myDoc.rRange[fNumNow]) {
     			fNumNow++;
     			fVector.add(tmpSet);
     			tmpSet.clear();
     		}
-    		for(int j : myDoc.vector.get(i)) {
+    		for(int j : myDoc.sVector.get(i)) {
     			tmpSet.add(j);
     		}
     	}
@@ -113,7 +113,7 @@ public class MEAD {
     	for(int i = 0; i < myDoc.snum; ++i) {
     		C[i] = 0.0;
     		for(int j = 0; j < wordNum; ++j) {
-    			if(myDoc.vector.get(i).contains(j)) {
+    			if(myDoc.sVector.get(i).contains(j)) {
     				C[i] += TfIdf[j];
     			}
     		}
@@ -127,11 +127,11 @@ public class MEAD {
     			P[i] = (myDoc.snum - i) * 1.0 * CMax / (myDoc.snum * 1.0);
     		}
     		else if(args[3].equals("2") || args[3].equals("3")) {
-    			if(i >= myDoc.r_range[fNumNow]) {
+    			if(i >= myDoc.rRange[fNumNow]) {
     				fNumNow++;
     			}
-    			int fSnum = myDoc.r_range[fNumNow] - myDoc.l_range[fNumNow];
-				P[i] = (fSnum - (i - myDoc.l_range[fNumNow])) * 1.0 * fCMax[fNumNow] / (fSnum * 1.0);
+    			int fSnum = myDoc.rRange[fNumNow] - myDoc.lRange[fNumNow];
+				P[i] = (fSnum - (i - myDoc.lRange[fNumNow])) * 1.0 * fCMax[fNumNow] / (fSnum * 1.0);
     		}
     	}
     	
@@ -140,8 +140,8 @@ public class MEAD {
     	for(int i = 0; i < myDoc.snum; ++i) {
     		F[i] = 0.0;
     		int k = 0;
-    		for(int j : myDoc.vector.get(i)) {
-    			F[i] += myDoc.s_tf.get(i).get(k) * TfIdf[j];
+    		for(int j : myDoc.sVector.get(i)) {
+    			F[i] += myDoc.sTf.get(i).get(k) * TfIdf[j];
     			k++;
     		}
     	}
@@ -175,22 +175,22 @@ public class MEAD {
     	
     	/* Remove redundancy and get the abstract */
     	if (args[7].equals("-1"))
-			myDoc.pick_sentence_MMR(Score, threshold, Beta);
+			myDoc.pickSentenceMMR(Score, threshold, Beta);
     	else if (args[7].equals("1"))
-            myDoc.pick_sentence_MMR(Score, threshold, Beta);
+            myDoc.pickSentenceMMR(Score, threshold, Beta);
         else if (args[7].equals("2"))
-            myDoc.pick_sentence_threshold(Score, threshold, Beta);
+            myDoc.pickSentenceThreshold(Score, threshold, Beta);
         else if (args[7].equals("3"))
-            myDoc.pick_sentence_sumPun(Score, threshold);
+            myDoc.pickSentenceSumpun(Score, threshold);
     	
     	/* Output the abstract */
     	try{
     		File outfile = new File(args[1]);
     		OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(outfile),"utf-8");
     		BufferedWriter writer = new BufferedWriter(write);
-    		for (int i : myDoc.summary_id){
-                //System.out.println(myDoc.original_sen.get(i));
-    			writer.write(myDoc.original_sen.get(i));
+    		for (int i : myDoc.summaryId){
+                //System.out.println(myDoc.originalSen.get(i));
+    			writer.write(myDoc.originalSen.get(i));
     			writer.write("\n");
             }
     		writer.close();
