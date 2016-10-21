@@ -82,7 +82,7 @@ Welcome to contact us if you have any questions or suggestions while using PKUSU
 Contact email: zhangjianmin2015@pku.edu.cn
 
 ##Reference
-[1]. Radev, Dragomir R., Hongyan Jing, and Malgorzata Budzikowska. 2000. Centroid-based summarization of multiple documents: sentence extraction, utility-based evaluation, and user studies. Proceedings of the 2000 NAACL-ANLP Workshop on Automatic summarization, Association for Computational Linguistics.
+[1]. Radev, Dragomir R., Hongyan Jing, Małgorzata Styś, Daniel Tam. 2004. Centroid-based summarization of multiple documents. Information Processing & Management, 40(6), 919-938.
 [2]. Mihalcea, Rada, and Paul Tarau. 2004. TextRank: Bringing order into texts. Association for Computational Linguistics.
 [3]. Erkan, Günes, and Dragomir R. Radev. 2004. LexPageRank: Prestige in Multi-Document Text Summarization. EMNLP. Vol.4.
 [4]. Gillick, Dan, and Benoit Favre. 2009. A scalable global model for summarization. Proceedings of the Workshop on Integer Linear Programming for Natural Language Processing, Association for Computational Linguistics.
