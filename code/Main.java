@@ -54,13 +54,13 @@ public class Main {
 	
 	public static void main(String args[])throws Exception{
 		/* Params and default value, you can modify them */
-		String language = "1", type = "1", abNum = "120", stopwordPath = "n", stemmerOrNot = "2";
-		String topic = "-1", ReMethod = "1", RePara = "0.7", beta = "0"/*, alpha = "0.85", eps = "0.00001"*/;
-		String linkThresh = "0.1", AlphaC = "0.1", LambdaC = "0.8", op = "2", AlphaS = "0.5", LambdaS = "-1";
+		String language = "1", type = "1", abNum = "100", stopwordPath = "y", stemmerOrNot = "1";
+		String topic = "-1", ReMethod = "1", RePara = "0.7", beta = "0";
+		String linkThresh = "0.1", AlphaC = "0.1", LambdaC = "0.8", op = "2", AlphaS = "-1", LambdaS = "-1";
 		String[] arg;
 		
-		String file = "D:\\research\\PKUSUMSUM\\data\\dataChn";
-		String outFile = "D:\\research\\PKUSUMSUM\\data\\dataChn-ILP";
+		String file = "D:\\research\\reviewGeneration\\data\\wikinews\\pureNews";
+		String outFile = "D:\\research\\reviewGeneration\\data\\wikinews\\ClusterCMRW";
 		
 		File dir = new File(file);
 		File[] files = dir.listFiles();
@@ -85,7 +85,7 @@ public class Main {
 			if (fOrd.getName().equals(".DS_Store")) {
 				continue;
 			}
-			ILP ilp = new ILP();
+			/*ILP ilp = new ILP();
 			arg = new String[7];
 			arg[0] = file + System.getProperty("file.separator") + fOrd.getName();
 			arg[1] = outFile + System.getProperty("file.separator") + fOrd.getName();
@@ -94,12 +94,12 @@ public class Main {
 			arg[4] = abNum;
 			arg[5] = stemmerOrNot;
 			arg[6] = stopwordPath;
- 			ilp.Summarize(arg);
+ 			ilp.Summarize(arg);*/
 			
 			/*Lead lead = new Lead();
 			arg = new String[7];
 			arg[0] = file + System.getProperty("file.separator") + fOrd.getName();
-			arg[1] = outFile + System.getProperty("file.separator") + fOrd.getName();
+			arg[1] = outFile + System.getProperty("file.separator") + fOrd.getName().replace("utf8", "");
 			arg[2] = language;
 			arg[3] = type;
 			arg[4] = abNum;
@@ -110,7 +110,7 @@ public class Main {
 			/*Coverage coverage = new Coverage();
 			arg = new String[7];
 			arg[0] = file + System.getProperty("file.separator") + fOrd.getName();
-			arg[1] = outFile + System.getProperty("file.separator") + fOrd.getName();
+			arg[1] = outFile + System.getProperty("file.separator") + fOrd.getName().replace("utf8", "");
 			arg[2] = language;
 			arg[3] = type;
 			arg[4] = abNum;
@@ -121,7 +121,7 @@ public class Main {
 			/*LexPageRank lexpagerank = new LexPageRank();
 			arg = new String[13];
 			arg[0] = file + System.getProperty("file.separator") + fOrd.getName();
-			arg[1] = outFile + System.getProperty("file.separator") + fOrd.getName();
+			arg[1] = outFile + System.getProperty("file.separator") + fOrd.getName().replace("utf8", "");
 			arg[2] = language;
 			arg[3] = type;
 			arg[4] = abNum;
@@ -130,15 +130,13 @@ public class Main {
 			arg[7] = ReMethod;
 			arg[8] = RePara;
 			arg[9] = beta;
-			arg[8] = alpha;
-			arg[9] = eps;
-			arg[12] = linkThresh;
+			arg[10] = linkThresh;
  			lexpagerank.Summarize(arg);*/
 			
  			/*TextRank textrank = new TextRank();
  			arg = new String[10];
  			arg[0] = file + System.getProperty("file.separator") + fOrd.getName();
-			arg[1] = outFile + System.getProperty("file.separator") + fOrd.getName();
+			arg[1] = outFile + System.getProperty("file.separator") + fOrd.getName().replace("utf8", "");
 			arg[2] = language;
 			arg[3] = type;
 			arg[4] = abNum;
@@ -147,14 +145,12 @@ public class Main {
 			arg[7] = ReMethod;
 			arg[8] = RePara;
 			arg[9] = beta;
-			arg[8] = alpha;
-			arg[9] = eps;
 			textrank.Summarize(arg);*/
 			
 			/*MEAD mead = new MEAD();
  			arg = new String[11];
  			arg[0] = file + System.getProperty("file.separator") + fOrd.getName();
-			arg[1] = outFile + System.getProperty("file.separator") + fOrd.getName();
+			arg[1] = outFile + System.getProperty("file.separator") + fOrd.getName().replace("utf8", "");
 			arg[2] = language;
 			arg[3] = type;
 			arg[4] = abNum;
@@ -184,7 +180,7 @@ public class Main {
  			/*Submodular submodular = new Submodular();
 			arg = new String[11];
 			arg[0] = file + System.getProperty("file.separator") + fOrd.getName();
-			arg[1] = outFile + System.getProperty("file.separator") + fOrd.getName();
+			arg[1] = outFile + System.getProperty("file.separator") + fOrd.getName().replace("utf8", "");
 			arg[2] = language;
 			arg[3] = type;
 			arg[4] = abNum;
@@ -199,7 +195,7 @@ public class Main {
 			/*ClusterCMRW clusterCMRW = new ClusterCMRW();
 			arg = new String[12];
 			arg[0] = file + System.getProperty("file.separator") + fOrd.getName();
-			arg[1] = outFile + System.getProperty("file.separator") + fOrd.getName();
+			arg[1] = outFile + System.getProperty("file.separator") + fOrd.getName().replace("utf8", "");
 			arg[2] = language;
 			arg[3] = type;
 			arg[4] = abNum;

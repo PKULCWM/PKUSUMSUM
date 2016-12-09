@@ -73,11 +73,11 @@ public class Doc {
       fnum = 0;
       totalLen = snum;
       for (String infile : rfiles) {
-      	if (infile.equals(".DS_Store")) {
+    	  if (infile.equals(".DS_Store")) {
 				System.out.println("Skiping!!");
 				continue;
-			}
-      	fnum++;
+    	  }
+    	  fnum++;
           String path;
           if (!filepath.equals(" ")) {
               path = filepath + System.getProperty("file.separator") + infile;
@@ -97,6 +97,7 @@ public class Doc {
 			if (language.equals("3"))//3 represent other
 				tmp = mytoken.tokenizeEng(path, stopwordPath);
           int len = tmp.size();
+          
           lRange[i] = totalLen;
           totalLen += len;
           rRange[i] = totalLen;

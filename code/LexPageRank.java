@@ -59,7 +59,6 @@ public class LexPageRank {
     		File myfile = new File(args[0]);
             myDoc.maxlen = Integer.parseInt(args[4]);
             myDoc.readfile(myfile.list(),args[0],args[2], args[6]);
-            
         }
     	
     	/* Calculate sentences' similarity matrix and construct link or not matrix depending on the similarity matrix */
@@ -122,7 +121,7 @@ public class LexPageRank {
 		if (Double.parseDouble(args[9])>=0){
 			Beta = Double.parseDouble(args[9]);
         }
-		
+	
 		/* Remove redundancy and get the abstract */
 		if (args[7].equals("-1"))
 			myDoc.pickSentenceMMR(u, threshold, Beta);
@@ -141,7 +140,6 @@ public class LexPageRank {
     		OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(outfile),"utf-8");
     		BufferedWriter writer = new BufferedWriter(write);
     		for (int i : myDoc.summaryId){
-                //System.out.println(myDoc.originalSen.get(i));
     			writer.write(myDoc.originalSen.get(i));
     			writer.write("\n");
             }

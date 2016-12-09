@@ -61,7 +61,6 @@ public class Coverage {
     		OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(outfile),"utf-8");
     		BufferedWriter writer = new BufferedWriter(write);
     		for (int i : summaryId){
-                //System.out.println(myDoc.originalSen.get(i));
     			writer.write(myDoc.originalSen.get(i));
     			writer.write("\n");
             }

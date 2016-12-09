@@ -53,6 +53,7 @@ public class Lead {
     	int tmp = 0;
         while(sumNum <= myDoc.maxlen && tmp < myDoc.snum) {
         	summaryId.add(tmp);
+        	
         	sumNum += myDoc.senLen.get(tmp);
         	tmp++;
         }
@@ -63,7 +64,6 @@ public class Lead {
     		OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(outfile),"utf-8");
     		BufferedWriter writer = new BufferedWriter(write);
     		for (int i : summaryId){
-                //System.out.println(myDoc.originalSen.get(i));
     			writer.write(myDoc.originalSen.get(i));
     			writer.write("\n");
             }
