@@ -180,7 +180,7 @@ public class Tokenizer {
             line = reader.readLine();
         }
         reader.close();
-        Pattern pattern = Pattern.compile(".*?[¡££¿£¡]");
+        Pattern pattern = Pattern.compile(".*?[ã€‚ï¼Ÿï¼]");
         Matcher matcher = pattern.matcher(buffer);
         Pattern p2=Pattern.compile("[\u4e00-\u9fa5]");
         while (matcher.find()) {

@@ -97,7 +97,7 @@ public class ManifoldRank {
     	double eps = 0.00001, alpha = 0.6 , minus = 1.0;
     			
     	while (minus > eps) {
-    		uOld = u;
+    		uOld = u.clone();
 			for (int i = 0; i < myDoc.snum; i++) {
 				double sumSim = 0.0;
 				for (int j = 0; j < myDoc.snum; j++) {

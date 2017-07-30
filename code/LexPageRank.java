@@ -94,7 +94,7 @@ public class LexPageRank {
 		double eps = 0.00001, alpha = 0.85 , minus = 1.0;
 		
 		while (minus > eps) {
-			uOld = u;
+			uOld = u.clone();
 			for (int i = 0; i < myDoc.snum; ++i) {
 				double nowSum = 0.0;
 			    for(int j = 0; j < myDoc.snum; ++j) {
