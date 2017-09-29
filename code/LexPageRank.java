@@ -73,8 +73,7 @@ public class LexPageRank {
     	for (int i = 0; i < myDoc.snum; ++i) {
     		C[i] = 0;
     		for(int j = 0; j < myDoc.snum; ++j) {
-    			if (j == i) linkOrNot[i][j] = 0;
-    			else if(100 * myDoc.sim[i][j] >= linkThresh) {
+    			if(100 * myDoc.sim[i][j] >= linkThresh) {
     				C[i]++;
     				linkOrNot[i][j] = 1;
     			}else {
